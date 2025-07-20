@@ -293,7 +293,7 @@ impl ComboBox {
 
     /// Check if the [`ComboBox`] with the given id has its popup menu currently opened.
     pub fn is_open(ctx: &Context, id: impl Into<Id>) -> bool {
-        Popup::is_id_open(ctx, Self::widget_to_popup_id(id.into()))
+        Popup::is_id_open(ctx, Self::widget_to_popup_id(id))
     }
 
     /// Convert a [`ComboBox`] id to the id used to store it's popup state.
@@ -429,7 +429,7 @@ fn button_frame(
     let mut outer_rect = content_ui.min_rect().expand2(margin);
     outer_rect.set_height(outer_rect.height().at_least(interact_size.y));
 
-    let response = ui.interact(outer_rect, id.into(), sense);
+    let response = ui.interact(outer_rect, id, sense);
 
     if ui.is_rect_visible(outer_rect) {
         let visuals = if is_popup_open {

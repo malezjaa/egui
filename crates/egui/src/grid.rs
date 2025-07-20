@@ -16,7 +16,7 @@ pub(crate) struct State {
 
 impl State {
     pub fn load(ctx: &Context, id: impl Into<Id>) -> Option<Self> {
-        ctx.data_mut(|d| d.get_temp(id.into()))
+        ctx.data_mut(|d| d.get_temp(id))
     }
 
     pub fn store(self, ctx: &Context, id: impl Into<Id>) {

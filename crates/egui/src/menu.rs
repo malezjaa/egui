@@ -519,7 +519,7 @@ impl SubMenuButton {
         ui: &'a Ui,
         response: &Response,
         menu_state: &MenuState,
-        sub_id: Id,
+        sub_id: impl Into<Id>,
     ) -> &'a WidgetVisuals {
         if menu_state.is_open(sub_id) && !response.hovered() {
             &ui.style().visuals.widgets.open
@@ -575,7 +575,7 @@ impl SubMenuButton {
         });
 
         if ui.is_rect_visible(rect) {
-            let visuals = Self::visuals(ui, &response, menu_state, sub_id.into());
+            let visuals = Self::visuals(ui, &response, menu_state, sub_id);
             let text_pos = Align2::LEFT_CENTER
                 .align_size_within_rect(text_galley.size(), rect.shrink2(button_padding))
                 .min;

@@ -25,7 +25,7 @@ impl Modal {
     /// The id is passed to the area.
     pub fn new(id: impl Into<Id>) -> Self {
         Self {
-            area: Self::default_area(id.into()),
+            area: Self::default_area(id),
             backdrop_color: Color32::from_black_alpha(100),
             frame: None,
         }
