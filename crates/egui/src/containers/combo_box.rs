@@ -292,20 +292,20 @@ impl ComboBox {
     }
 
     /// Check if the [`ComboBox`] with the given id has its popup menu currently opened.
-    pub fn is_open(ctx: &Context, id: Id) -> bool {
-        Popup::is_id_open(ctx, Self::widget_to_popup_id(id))
+    pub fn is_open(ctx: &Context, id: impl Into<Id>) -> bool {
+        Popup::is_id_open(ctx, Self::widget_to_popup_id(id.into()))
     }
 
     /// Convert a [`ComboBox`] id to the id used to store it's popup state.
-    fn widget_to_popup_id(widget_id: Id) -> Id {
-        widget_id.with("popup")
+    fn widget_to_popup_id(widget_id: impl Into<Id>) -> Id {
+        widget_id.into().with("popup")
     }
 }
 
 #[expect(clippy::too_many_arguments)]
 fn combo_box_dyn<'c, R>(
     ui: &mut Ui,
-    button_id: Id,
+    button_id: impl Into<Id>,
     selected_text: WidgetText,
     menu_contents: Box<dyn FnOnce(&mut Ui) -> R + 'c>,
     icon: Option<IconPainter>,
@@ -313,6 +313,7 @@ fn combo_box_dyn<'c, R>(
     close_behavior: Option<PopupCloseBehavior>,
     (width, height): (Option<f32>, Option<f32>),
 ) -> InnerResponse<Option<R>> {
+    let button_id = button_id.into();
     let popup_id = ComboBox::widget_to_popup_id(button_id);
 
     let is_popup_open = Popup::is_id_open(ui.ctx(), popup_id);
@@ -408,7 +409,7 @@ fn combo_box_dyn<'c, R>(
 
 fn button_frame(
     ui: &mut Ui,
-    id: Id,
+    id: impl Into<Id>,
     is_popup_open: bool,
     sense: Sense,
     add_contents: impl FnOnce(&mut Ui),
@@ -428,7 +429,7 @@ fn button_frame(
     let mut outer_rect = content_ui.min_rect().expand2(margin);
     outer_rect.set_height(outer_rect.height().at_least(interact_size.y));
 
-    let response = ui.interact(outer_rect, id, sense);
+    let response = ui.interact(outer_rect, id.into(), sense);
 
     if ui.is_rect_visible(outer_rect) {
         let visuals = if is_popup_open {

@@ -80,7 +80,7 @@ impl ViewportState {
                 if ctx.input(|i| i.viewport().close_requested()) {
                     vp_state.visible = false;
                 }
-                show_as_popup(ctx, class, &title, vp_id.into(), |ui: &mut egui::Ui| {
+                show_as_popup(ctx, class, &title, vp_id, |ui: &mut egui::Ui| {
                     generic_child_ui(ui, &mut vp_state, close_button);
                 });
             });
@@ -96,7 +96,7 @@ impl ViewportState {
                     ctx,
                     class,
                     &title,
-                    vp_id.into(),
+                    vp_id,
                     move |ui: &mut egui::Ui| {
                         let current_count = *count.read();
                         ui.label(format!("Callback has been reused {current_count} times"));
@@ -183,7 +183,7 @@ fn show_as_popup(
     ctx: &egui::Context,
     class: egui::ViewportClass,
     title: &str,
-    id: Id,
+    id: impl Into<Id>,
     content: impl FnOnce(&mut egui::Ui),
 ) {
     if class == egui::ViewportClass::Embedded {
@@ -322,7 +322,8 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
     }
 
     impl DragAndDrop {
-        fn init(&mut self, container: Id) {
+        fn init(&mut self, container: impl Into<Id>) {
+            let container = container.into();
             if !self.containers_data.contains_key(&container) {
                 for i in 0..COLS {
                     self.insert(
@@ -334,13 +335,13 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
             }
         }
 
-        fn insert(&mut self, container: Id, col: usize, value: impl Into<String>) {
+        fn insert(&mut self, container: impl Into<Id>, col: usize, value: impl Into<String>) {
             assert!(col <= COLS, "The coll should be less then: {COLS}");
 
             let value: String = value.into();
             let id = Id::new(format!("%{}% {}", self.counter, &value));
             self.data.insert(id, value);
-            let viewport_data = self.containers_data.entry(container).or_insert_with(|| {
+            let viewport_data = self.containers_data.entry(container.into()).or_insert_with(|| {
                 let mut res = Vec::new();
                 res.resize_with(COLS, Default::default);
                 res
@@ -350,9 +351,9 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
             viewport_data[col].push(id);
         }
 
-        fn cols(&self, container: Id, col: usize) -> Vec<(Id, String)> {
+        fn cols(&self, container: impl Into<Id>, col: usize) -> Vec<(Id, String)> {
             assert!(col <= COLS, "The col should be less then: {COLS}");
-            let container_data = &self.containers_data[&container];
+            let container_data = &self.containers_data[&container.into()];
             container_data[col]
                 .iter()
                 .map(|id| (*id, self.data[id].clone()))
@@ -360,7 +361,7 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
         }
 
         /// Move element ID to Viewport and col
-        fn mov(&mut self, to: Id, col: usize) {
+        fn mov(&mut self, to: impl Into<Id>, col: usize) {
             let Some(id) = self.is_dragged.take() else {
                 return;
             };
@@ -373,13 +374,13 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
                 }
             }
 
-            if let Some(container_data) = self.containers_data.get_mut(&to) {
+            if let Some(container_data) = self.containers_data.get_mut(&to.into()) {
                 container_data[col].push(id);
             }
         }
 
-        fn dragging(&mut self, id: Id) {
-            self.is_dragged = Some(id);
+        fn dragging(&mut self, id: impl Into<Id>) {
+            self.is_dragged = Some(id.into());
         }
     }
 
@@ -414,9 +415,10 @@ fn drag_and_drop_test(ui: &mut egui::Ui) {
 // This is taken from crates/egui_demo_lib/src/debo/drag_and_drop.rs
 fn drag_source<R>(
     ui: &mut egui::Ui,
-    id: egui::Id,
+    id: impl Into<Id>,
     body: impl FnOnce(&mut egui::Ui) -> R,
 ) -> InnerResponse<R> {
+    let id = id.into();
     let is_being_dragged = ui.ctx().is_being_dragged(id);
 
     if !is_being_dragged {
